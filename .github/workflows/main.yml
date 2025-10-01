@@ -1,6 +1,5 @@
 name: A workflow for my Hello World App
 on: push
-
 jobs:
   build:
     name: Hello world action
@@ -13,11 +12,16 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
-      - name: Compile with Maven
-        run: mvn compile
-      - name: Build Docker Image
-        run: docker build -t devopsimage .
+      - name: Setup network
+        run: |
+          docker network create --driver bridge se-methods          
+          docker pull mongo          
+          docker run -d --name mongo-dbserver --network se-methods mongo
+      - name: Build with Maven
+        run: mvn package
+      - name: Build
+        run: docker build -t se_methods .
       - name: Run image
-        run: docker run --name devopscontainer -d devopsimage
+        run: docker run --network se-methods --name devopscontainer se_methods
       - name: view logs
         run: docker logs devopscontainer
