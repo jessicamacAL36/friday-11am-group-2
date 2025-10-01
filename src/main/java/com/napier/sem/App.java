@@ -5,14 +5,11 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 
-public class App
-{
-    public static void main(String[] args)
-    {
+public class App {
+    public static void main(String[] args) {
         // === The Try-With-Resources block ensures MongoClient is closed ===
         // The application connects to the database container via its network name and internal port.
-        try (MongoClient mongoClient = new MongoClient("mongo-dbserver", 27017))
-        {
+        try (MongoClient mongoClient = new MongoClient("mongo-dbserver", 27017)) {
             // Get a database - will create when we use it
             MongoDatabase database = mongoClient.getDatabase("mydb");
 
@@ -33,8 +30,7 @@ public class App
             System.out.println(myDoc.toJson());
         }
         // Catch any exception that occurs during connection or operation
-        catch (Exception e)
-        {
+        catch (Exception e) {
             System.err.println("An error occurred during MongoDB operation: " + e.getMessage());
         }
     }
