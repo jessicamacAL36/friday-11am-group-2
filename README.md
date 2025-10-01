@@ -1,2 +1,3 @@
-friday 11am group 2
-hello
+SEM GROUP PROJECT
+
+FRIDAY 11AM GROUP 2
