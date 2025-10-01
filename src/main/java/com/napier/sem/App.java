@@ -9,8 +9,9 @@ public class App
 {
     public static void main(String[] args)
     {
-        // === IMPLEMENT TRY-WITH-RESOURCES HERE ===
-        try (MongoClient mongoClient = new MongoClient("localhost", 27000))
+        // === The Try-With-Resources block ensures MongoClient is closed ===
+        // The application connects to the database container via its network name and internal port.
+        try (MongoClient mongoClient = new MongoClient("mongo-dbserver", 27017))
         {
             // Get a database - will create when we use it
             MongoDatabase database = mongoClient.getDatabase("mydb");
@@ -36,6 +37,5 @@ public class App
         {
             System.err.println("An error occurred during MongoDB operation: " + e.getMessage());
         }
-        // NOTE: The 'finally' block is no longer needed!
     }
 }
