@@ -10,11 +10,9 @@ License ![license](https://img.shields.io/badge/license-Apache--2.0-yellowgreen.
 Release ![release](https://img.shields.io/badge/release-none-lightgrey.svg)
 
 ------------
-
 ## Product Backlog
 
-View the Live Kanban Project Board Here: [Project Board Link]([https://github.com/users/jessicamacAL36/projects/1])
+[![Project Status](https://img.shields.io/badge/Kanban%20Board-Live%20Progress-blue?style=for-the-badge&logo=github)](https://github.com/users/jessicamacAL36/projects/1/views/1)
 
--------
-
+------
 ## Code of Conduct
