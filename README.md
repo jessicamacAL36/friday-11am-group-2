@@ -13,7 +13,7 @@ Release ![release](https://img.shields.io/badge/release-none-lightgrey.svg)
 
 ## Product Backlog
 
-View the Live Kanban Project Board Here: [Project Board Link]([https://github.com/users/jessicamacAL36/projects/1])]
+View the Live Kanban Project Board Here: [Project Board Link]([https://github.com/users/jessicamacAL36/projects/1])
 
 -------
 
