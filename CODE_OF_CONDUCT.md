@@ -6,6 +6,6 @@
 
 - Focus: The team's energy is on the Sprint Goal, eliminating distractions to deliver high-quality work efficiently.
 
-- Openness: Be transparent about all work—progress, challenges, and feedback—to build trust and enable honest, diverse conversations.
+- Openness: Be transparent about all work (progress, challenges, and feedback) to build trust and enable honest, diverse conversations.
 
 - Respect: Value each other as capable professionals, appreciating diverse skills and opinions to create an inclusive environment.
