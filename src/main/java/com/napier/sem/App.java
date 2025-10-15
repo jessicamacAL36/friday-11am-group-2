@@ -33,7 +33,7 @@ public class App
             System.out.println("Connecting to database...");
             try
             {
-                // Wait longer for the large database to finish loading
+                // Wait longer for the large database to finish loading (120 seconds)
                 Thread.sleep(120000);
 
                 // Connect to database using the Docker Compose service name 'db' and database 'world'
@@ -82,7 +82,7 @@ public class App
     public ArrayList<Country> getAllCountries()
     {
         if (con == null) {
-            System.out.println("Database connection is null.");
+            System.out.println("Database connection is null. Cannot retrieve data.");
             return null;
         }
 
@@ -134,7 +134,7 @@ public class App
         // Connect to database
         a.connect();
 
-        // Extract country information and test retrieval (Phase 2 Goal)
+        // Extract country information and test retrieval
         ArrayList<Country> countries = a.getAllCountries();
 
         // Print the size of the returned data to verify data was loaded
