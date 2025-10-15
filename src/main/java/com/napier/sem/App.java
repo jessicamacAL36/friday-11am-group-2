@@ -155,6 +155,7 @@ public class App
         }
     }
 
+
     /**
      * Application entry point for testing connection and data retrieval.
      */
