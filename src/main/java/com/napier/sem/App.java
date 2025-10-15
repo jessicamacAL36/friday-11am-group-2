@@ -124,27 +124,51 @@ public class App
     }
 
     /**
+     * Prints a list of countries in a formatted table.
+     * @param countries The list of countries to print.
+     */
+    public void displayCountries(java.util.ArrayList<Country> countries)
+    {
+        if (countries == null)
+        {
+            System.out.println("No countries to display.");
+            return;
+        }
+
+        // Print header: Code, Name, Continent, Region, Population, Capital
+        System.out.println(String.format("%-6s %-45s %-20s %-20s %-15s %-20s",
+                "Code", "Name", "Continent", "Region", "Population", "Capital"));
+        System.out.println("-----------------------------------------------------------------------------------------------------------------------------");
+
+        // Loop over all countries in the list
+        for (Country country : countries)
+        {
+            String country_string =
+                    String.format("%-6s %-45s %-20s %-20s %-15s %-20s",
+                            country.Code,
+                            country.Name,
+                            country.Continent,
+                            country.Region,
+                            country.Population,
+                            country.Capital);
+            System.out.println(country_string);
+        }
+    }
+
+    /**
      * Application entry point for testing connection and data retrieval.
      */
     public static void main(String[] args)
     {
-        // Create new Application object
         App a = new App();
-
-        // Connect to database
         a.connect();
 
-        // Extract country information and test retrieval
-        ArrayList<Country> countries = a.getAllCountries();
+        // Extract country information
+        java.util.ArrayList<Country> countries = a.getAllCountries();
 
-        // Print the size of the returned data to verify data was loaded
-        if (countries != null) {
-            System.out.println("Total Countries Found: " + countries.size());
-        } else {
-            System.out.println("No countries retrieved.");
-        }
+        // Display the results
+        a.displayCountries(countries);
 
-        // Disconnect from database
         a.disconnect();
     }
 }
