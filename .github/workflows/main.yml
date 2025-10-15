@@ -8,7 +8,7 @@ jobs:
       - name: Checkout Repository and Submodules
         uses: actions/checkout@v4
         with:
-          # CRITICAL: This ensures the db/ folder (and the world.sql file) is available to the runner.
+          # CRITICAL: This ensures the db/ folder (with the world.sql) is available.
           submodules: recursive
 
       - name: Set up JDK 17
@@ -18,7 +18,7 @@ jobs:
           distribution: 'adopt'
 
       - name: Build with Maven
-        run: mvn package # Creates the self-contained JAR file with the latest code
+        run: mvn package # Creates the self-contained JAR file (0.1.0.3 version)
 
       - name: Run Docker Compose Test
         # This command builds and runs BOTH the 'app' and 'db' services.
