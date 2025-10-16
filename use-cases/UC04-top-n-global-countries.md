@@ -1,14 +1,14 @@
-## Use Case: UC01 - Generate Global Country Report
+## Use Case:04 - Top N Global Countries
 
-**Goal in Context (User Story):** As an Analyst, I want to retrieve a report of all countries in the world sorted by population so that I can analyze global demographics.
+**Goal in Context (User Story):** As an Analyst, I want to retrieve the top N populated countries in the world, where N is user-defined, so that I can quickly identify the most populous nations.al analysis.
 
 **Scope:** Population Reporting System (Application and Database)
 
-**Level:** Summary / Sea-level
+**Level:** User Goal
 
 **Primary Actor:** Analyst
 
-**Trigger:** Analyst selects the "Global Country Report" option from the application interface.
+**Trigger:** Analyst selects the "Top N Global Countries" option from the application interface.
 
 **Preconditions:**
 1. The System is running (Application container is 'Up').
@@ -16,10 +16,10 @@
 3. The Analyst has appropriate permissions (assumed by the system boundary).
 
 **Success End Condition:**
-The System displays the complete Country Report (Code, Name, Continent, Region, Population, Capital) for all countries, correctly ordered by Population (descending).
+The System displays the complete Country Report (Code, Name, Continent, Region, Population, Capital) for the specified region, correctly ordered by Population (descending).
 
 **Failed Condition:**
-The System displays an error message (e.g., "Database connection failed," "No data found") and returns to the report menu.
+The System displays an error message (e.g., "Invalid Region name," "Database connection failed") and returns to the report menu.
 
 ### Main Success Scenario
 
@@ -34,3 +34,4 @@ The System displays an error message (e.g., "Database connection failed," "No da
 
 * **2a. [Connection Failure]:** If the database link is broken, the System prints "Failed to connect to database" (after 10 retries) and terminates the use case.
 * **4a. [No Data Found]:** If the SQL query returns an empty result set (0 rows), the System prints: "No countries were retrieved from the database."
+* **6a. [No Data Found]:** If the SQL query returns an empty result set (0 rows) for the valid region, the System prints: "No countries were retrieved for the specified region."
