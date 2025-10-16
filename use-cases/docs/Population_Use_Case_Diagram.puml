@@ -1,30 +1,64 @@
 @startuml
 
 skinparam handwritten true
+skinparam style strict
 
 actor Analyst
-actor SystemAdmin
 
 rectangle "Population Reporting System" {
-    usecase UC_GlobalReport as "Generate Global Country Report"
-    usecase UC_ContinentReport as "Generate Continent Report"
-    usecase UC_PopulationStats as "View Detailed Population Stats"
-    usecase UC_LanguageReport as "Generate Language Report"
-    usecase UC_DBConnect as "Connect to Database"
-}
 
-' Relationships
-Analyst --> UC_GlobalReport
-Analyst --> UC_ContinentReport
-Analyst --> UC_PopulationStats
-Analyst --> UC_LanguageReport
+    ' Utility Use Case (Included by all reports)
+    usecase UC_DBConnect as "Connect and Authenticate"
 
-SystemAdmin -- UC_DBConnect
+    '--- A. COUNTRY REPORTS ---
 
-' All reports INCLUDE the basic connection logic
-UC_GlobalReport .> UC_DBConnect : <<includes>>
-UC_ContinentReport .> UC_DBConnect : <<includes>>
-UC_PopulationStats .> UC_DBConnect : <<includes>>
-UC_LanguageReport .> UC_DBConnect : <<includes>>
+    usecase UC01_GlobalCountry as "All Global Countries"
+    usecase UC02_ContinentCountry as "All Countries by Continent"
+    usecase UC03_RegionCountry as "All Countries by Region"
+
+    ' Top N variations EXTEND the base reports
+    usecase UC04_TopNGlobal as "Top N Global Countries"
+    usecase UC05_TopNContinent as "Top N Continent Countries"
+    usecase UC06_TopNRegion as "Top N Region Countries"
+
+    '--- B. CITY REPORTS (Abbreviated) ---
+
+    usecase UC07_GlobalCity as "All Global Cities"
+    usecase UC10_CountryCity as "All Cities by Country"
+
+    '--- C. CAPITAL REPORTS (Abbreviated) ---
+
+    usecase UC17_GlobalCapitals as "All Global Capitals"
+
+    '--- D. POPULATION BREAKDOWN (Abbreviated) ---
+
+    usecase UC23_ContinentBreakdown as "Continent Pop Breakdown"
+
+    '--- F. LANGUAGE REPORTS ---
+
+    usecase UC32_LanguageReport as "Global Language Report"
+
+} ' End System Boundary
+
+' 1. ASSOCIATIONS: Analyst accesses all reports
+Analyst --> UC01_GlobalCountry
+Analyst --> UC05_TopNContinent
+Analyst --> UC17_GlobalCapitals
+Analyst --> UC23_ContinentBreakdown
+Analyst --> UC32_LanguageReport
+' ... continue for all 32 UCs
+
+' 2. EXTENSIONS: Parameterized reports extend base reports
+UC04_TopNGlobal ..> UC01_GlobalCountry : <<extends>>
+UC05_TopNContinent ..> UC02_ContinentCountry : <<extends>>
+UC06_TopNRegion ..> UC03_RegionCountry : <<extends>>
+' ... continue for all Top N City/Capital reports
+
+' 3. INCLUSIONS: All core reports include the DB connection
+UC01_GlobalCountry .> UC_DBConnect : <<includes>>
+UC02_ContinentCountry .> UC_DBConnect : <<includes>>
+UC03_RegionCountry .> UC_DBConnect : <<includes>>
+UC32_LanguageReport .> UC_DBConnect : <<includes>>
+' ... continue for all 32 UCs
 
 @enduml
