@@ -1,0 +1,30 @@
+@startuml
+
+skinparam handwritten true
+
+actor Analyst
+actor SystemAdmin
+
+rectangle "Population Reporting System" {
+    usecase UC_GlobalReport as "Generate Global Country Report"
+    usecase UC_ContinentReport as "Generate Continent Report"
+    usecase UC_PopulationStats as "View Detailed Population Stats"
+    usecase UC_LanguageReport as "Generate Language Report"
+    usecase UC_DBConnect as "Connect to Database"
+}
+
+' Relationships
+Analyst --> UC_GlobalReport
+Analyst --> UC_ContinentReport
+Analyst --> UC_PopulationStats
+Analyst --> UC_LanguageReport
+
+SystemAdmin -- UC_DBConnect
+
+' All reports INCLUDE the basic connection logic
+UC_GlobalReport .> UC_DBConnect : <<includes>>
+UC_ContinentReport .> UC_DBConnect : <<includes>>
+UC_PopulationStats .> UC_DBConnect : <<includes>>
+UC_LanguageReport .> UC_DBConnect : <<includes>>
+
+@enduml
