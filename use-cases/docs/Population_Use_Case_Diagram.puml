@@ -1,0 +1,16 @@
+@startuml
+skinparam handwritten true
+skinparam style strict
+
+rectangle "Population Information System" {
+    usecase Part1 as "UC01-UC16: Country & City Reports"
+    usecase Part2 as "UC17-UC32: Capitals & Population Stats"
+}
+
+' The Analyst interacts with the overall system, which is represented by these two parts
+actor Analyst as "Analyst User"
+
+Analyst -- Part1
+Analyst -- Part2
+
+@enduml
