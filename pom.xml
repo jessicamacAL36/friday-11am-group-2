@@ -8,16 +8,20 @@
     <artifactId>sem-group-project</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>  <maven.compiler.target>17</maven.compiler.target> <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
+        <!-- REMOVED: The obsolete 'mongodb-driver' dependency -->
+
+        <!-- ADDED: MySQL JDBC Driver for connecting to the 'db' service -->
         <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver</artifactId>
-            <version>3.6.4</version>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version> <!-- A modern, stable version for MySQL 8 -->
         </dependency>
     </dependencies>
 
@@ -30,7 +34,8 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.napier.sem.App</mainClass>
+                            <!-- UPDATED: Pointing to the new launcher class Main.java -->
+                            <mainClass>com.napier.sem.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
