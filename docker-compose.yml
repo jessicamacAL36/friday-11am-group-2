@@ -1,19 +1,27 @@
-version: '3' # Keeping version 3 for compatibility
 services:
   # 1. Your Java Application Service
   app:
+    # Build context: current directory (where Dockerfile for 'app' is)
     build: .
+    # Ensure the app waits for the database to be ready
     depends_on:
       - db
+    # Recommended command to keep the container running if needed, or remove if your Main.java runs the server
+    # entrypoint: ["java", "-jar", "/tmp/app.jar"]
 
   # 2. The MySQL Database Service
-
   db:
-    # Use the simple path syntax required by version '3'
-    build: ./db
+    # Use a modern, stable MySQL image (or the one built from your Dockerfile)
+    # Since you used 'build: ./db' before, we keep the build instruction:
+    build:
+      context: ./db
+    # Always restart the database if it crashes, unless explicitly stopped
     restart: always
     environment:
+      # CRITICAL: Always use a secure password in production!
       MYSQL_ROOT_PASSWORD: example
       MYSQL_DATABASE: world
+    # Map the internal container port (3306) to the host machine port (3306)
+    # This is only necessary if you want to connect from your host machine (e.g., MySQL Workbench).
     ports:
-      - "33060:3306"
+      - "3306:3306"
