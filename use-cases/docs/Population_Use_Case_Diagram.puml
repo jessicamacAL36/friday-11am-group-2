@@ -1,16 +1,99 @@
-@startuml
-skinparam handwritten true
-skinparam style strict
+@startuml PopulationReportingSystem
+title Population Reporting System - 32 Use Cases
 
-rectangle "Population Information System" {
-    usecase Part1 as "UC01-UC16: Country & City Reports"
-    usecase Part2 as "UC17-UC32: Capitals & Population Stats"
+left to right direction
+
+actor Analyst
+
+package "A. Country Reports (UC01-UC06)" {
+    usecase UC01_GlobalCountry as "UC01 Global Country Report"
+    usecase UC02_ContinentCountry as "UC02 Continent Country Report"
+    usecase UC03_RegionCountry as "UC03 Region Country Report"
+    usecase UC04_TopNGlobalCountry as "UC04 Top N Global Countries"
+    usecase UC05_TopNContinentCountry as "UC05 Top N Continent Countries"
+    usecase UC06_TopNRegionCountry as "UC06 Top N Region Countries"
 }
 
-' The Analyst interacts with the overall system, which is represented by these two parts
-actor Analyst as "Analyst User"
+package "B. City Reports (UC07-UC16)" {
+    usecase UC07_GlobalCity as "UC07 Global City Report"
+    usecase UC08_ContinentCity as "UC08 Continent City Report"
+    usecase UC09_RegionCity as "UC09 Region City Report"
+    usecase UC10_CountryCity as "UC10 Country City Report"
+    usecase UC11_DistrictCity as "UC11 District City Report"
+    usecase UC12_TopNGlobalCity as "UC12 Top N Global Cities"
+    usecase UC13_TopNContinentCity as "UC13 Top N Continent Cities"
+    usecase UC14_TopNRegionCity as "UC14 Top N Region Cities"
+    usecase UC15_TopNCountryCity as "UC15 Top N Country Cities"
+    usecase UC16_TopNDistrictCity as "UC16 Top N District Cities"
+}
 
-Analyst -- Part1
-Analyst -- Part2
+package "C. Capital City Reports (UC17-UC22)" {
+    usecase UC17_GlobalCapital as "UC17 Global Capital Report"
+    usecase UC18_ContinentCapital as "UC18 Continent Capital Report"
+    usecase UC19_RegionCapital as "UC19 Region Capital Report"
+    usecase UC20_TopNGlobalCapital as "UC20 Top N Global Capitals"
+    usecase UC21_TopNContinentCapital as "UC21 Top N Continent Capitals"
+    usecase UC22_TopNRegionCapital as "UC22 Top N Region Capitals"
+}
+
+package "D. Population Breakdown (UC23-UC25)" {
+    usecase UC23_ContinentBreakdown as "UC23 Continent Breakdown"
+    usecase UC24_RegionBreakdown as "UC24 Region Breakdown"
+    usecase UC25_CountryBreakdown as "UC25 Country Breakdown"
+}
+
+package "E. Single Population Totals (UC26-UC31)" {
+    usecase UC26_WorldPop as "UC26 World Population"
+    usecase UC27_ContinentPop as "UC27 Continent Population"
+    usecase UC28_RegionPop as "UC28 Region Population"
+    usecase UC29_CountryPop as "UC29 Country Population"
+    usecase UC30_DistrictPop as "UC30 District Population"
+    usecase UC31_CityPop as "UC31 City Population"
+}
+
+package "F. Language Report (UC32)" {
+    usecase UC32_GlobalLanguage as "UC32 Global Language Speakers"
+}
+
+' =================================================================
+' Actor to Use Case Associations
+' =================================================================
+Analyst --> UC01_GlobalCountry
+Analyst --> UC02_ContinentCountry
+Analyst --> UC03_RegionCountry
+Analyst --> UC04_TopNGlobalCountry
+Analyst --> UC05_TopNContinentCountry
+Analyst --> UC06_TopNRegionCountry
+
+Analyst --> UC07_GlobalCity
+Analyst --> UC08_ContinentCity
+Analyst --> UC09_RegionCity
+Analyst --> UC10_CountryCity
+Analyst --> UC11_DistrictCity
+Analyst --> UC12_TopNGlobalCity
+Analyst --> UC13_TopNContinentCity
+Analyst --> UC14_TopNRegionCity
+Analyst --> UC15_TopNCountryCity
+Analyst --> UC16_TopNDistrictCity
+
+Analyst --> UC17_GlobalCapital
+Analyst --> UC18_ContinentCapital
+Analyst --> UC19_RegionCapital
+Analyst --> UC20_TopNGlobalCapital
+Analyst --> UC21_TopNContinentCapital
+Analyst --> UC22_TopNRegionCapital
+
+Analyst --> UC23_ContinentBreakdown
+Analyst --> UC24_RegionBreakdown
+Analyst --> UC25_CountryBreakdown
+
+Analyst --> UC26_WorldPop
+Analyst --> UC27_ContinentPop
+Analyst --> UC28_RegionPop
+Analyst --> UC29_CountryPop
+Analyst --> UC30_DistrictPop
+Analyst --> UC31_CityPop
+
+Analyst --> UC32_GlobalLanguage
 
 @enduml
