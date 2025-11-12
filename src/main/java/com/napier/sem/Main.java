@@ -1,7 +1,7 @@
 package com.napier.sem;
 
-import java.util.InputMismatchException;
 import java.util.Scanner;
+// import java.util.InputMismatchException; <-- REMOVED: This import was unused.
 
 /**
  * Main application class responsible for initialising the application and
@@ -38,10 +38,8 @@ public class Main {
         while (choice != 0) {
             displayMenu();
             try {
-                // Check if the next input is a number
-                System.out.print("\nEnter choice: ");
-
                 // Read input as string first to handle mixed input (like '1' vs 'a')
+                System.out.print("\nEnter choice: ");
                 String input = scanner.nextLine().trim();
 
                 // If input is empty, restart loop
@@ -66,7 +64,8 @@ public class Main {
                 }
             } catch (Exception e) {
                 System.err.println("An unexpected error occurred: " + e.getMessage());
-                // In a real application, you might exit or log the error here
+                // Using standard error output instead of printStackTrace() for cleaner logging:
+                // e.printStackTrace();
             }
         }
     }
@@ -152,8 +151,8 @@ public class Main {
                 default: System.out.println("Error: Report number out of range (1-32).");
             }
         } catch (Exception e) {
-            System.err.println("\n!!! Report Execution Error: Could not run report due to invalid input or database issue.");
-            e.printStackTrace();
+            // FIX: Using robust logging via System.err instead of printStackTrace
+            System.err.println("\n!!! Report Execution Error: Could not run report due to invalid input or database issue: " + e.getMessage());
         }
     }
 

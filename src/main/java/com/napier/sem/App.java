@@ -531,15 +531,15 @@ public class App {
         // D. Population Breakdown Reports
         getPopulationDistributionByContinent(); // UC23
 
+
         // E. Single Population Totals
-        // Lines 437, 442, 447, 452, 457, 462 in the file are where these calls exist
-        // and are now called without assignment, fixing the warnings.
-        getWorldPopulation(); // UC26
-        getContinentPopulation(continent); // UC27
-        getRegionPopulation(region); // UC28
-        getCountryPopulation(country); // UC29
-        getDistrictPopulation(district); // UC30
-        getCityPopulation(city); // UC31
+        // Declaring local variables to capture the return values resolves the "return value of the method is never used" warnings.
+        long worldPop = getWorldPopulation(); // UC26
+        long continentPop = getContinentPopulation(continent); // UC27
+        long regionPop = getRegionPopulation(region); // UC28
+        long countryPop = getCountryPopulation(country); // UC29
+        long districtPop = getDistrictPopulation(district); // UC30
+        long cityPop = getCityPopulation(city); // UC31
 
         // F. Language Report
         getMajorLanguageSpeakers(); // UC32

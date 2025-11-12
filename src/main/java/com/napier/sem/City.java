@@ -18,7 +18,7 @@ public class City {
     /** City Population */
     public long Population;
     /** Flag to indicate if the report is a Capital City report (affects output format) */
-    private boolean isCapital;
+    private final boolean isCapital; // <-- FIXED: Declared as final
 
     /**
      * Constructor for City object.
@@ -86,6 +86,7 @@ public class City {
             System.out.println("---------------------------------------------------");
             return;
         }
+
 
         System.out.println("\n=====================================================================================================");
         System.out.println(" " + title);

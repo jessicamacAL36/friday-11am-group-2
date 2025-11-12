@@ -59,6 +59,7 @@ public class PopulationSummary {
                 this.RuralPopulationPercent);
     }
 
+
     /**
      * Prints a formatted list of PopulationSummary objects.
      * @param summaries The list of PopulationSummary objects to print.
