@@ -532,6 +532,7 @@ public class App {
         getPopulationDistributionByContinent(); // UC23
 
 
+
         // E. Single Population Totals
         // Declaring local variables to capture the return values resolves the "return value of the method is never used" warnings.
         long worldPop = getWorldPopulation(); // UC26
