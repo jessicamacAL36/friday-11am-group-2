@@ -32,7 +32,7 @@ public class App {
             return;
         }
 
-        String url = "jdbc:mysql://db:3306/world?allowPublicKeyRetrieval=true&useSSL=false";
+        String url = "jdbc:mysql://localhost:3306/world?allowPublicKeyRetrieval=true&useSSL=false";
         String user = "root";
         String password = "example";
 

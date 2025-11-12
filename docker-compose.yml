@@ -1,34 +1,38 @@
 services:
   # 1. Your Java Application Service (Test Runner)
   app:
-    # Build context points to the root directory where your Dockerfile is located.
+    # Uses the current directory for the Dockerfile (where your Java project is built)
     build: .
-    # CRITICAL FIX: Ensure the app waits until the database passes its health check.
+    # CRITICAL FIX: The app service waits until the database reports that it is 'healthy'.
     depends_on:
       db:
         condition: service_healthy
-    # If running directly from IntelliJ, you may use a specific command:
+    # If your Dockerfile sets the CMD, leave this commented.
+    # Otherwise, uncomment and set your main entry point (e.g., tests or main class).
     # entrypoint: ["java", "-jar", "/tmp/app.jar"]
 
   # 2. The MySQL Database Service
   db:
-    # Assuming your Dockerfile/context for MySQL is in a folder named 'db'
+    # Context to build the MySQL image (where your world.sql is located)
     build:
       context: ./db
-    # Always restart the database if it crashes unexpectedly
+    # Always restart the database if it crashes
     restart: always
     environment:
-      # These must match the settings in your App.java connect() method
+      # These variables populate the database and must match App.java
       MYSQL_ROOT_PASSWORD: example
       MYSQL_DATABASE: world
-    # Map the internal container port (3306) to the host machine port (3306).
+    # Mapping the port is useful for connecting from IntelliJ (Host:3306 -> Container:3306)
     ports:
       - "3306:3306"
 
-    # CRITICAL ADDITION: Health check to ensure MySQL is fully ready (not just running)
+    # CRITICAL ADDITION: Health check tells Docker exactly when the database is ready.
     healthcheck:
-      # Command runs inside the container to verify the server is responding to a ping
+      # Command runs inside the container to ping the MySQL server with credentials.
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pexample"]
-      interval: 5s
+      # Check every 10 seconds
+      interval: 10s
+      # Wait up to 10 seconds for a response
       timeout: 10s
+      # Allow up to 5 failures before declaring 'unhealthy'
       retries: 5
