@@ -168,6 +168,7 @@ public class Main {
         return scanner.nextLine().trim();
     }
 
+
     /**
      * Prompts the user for the integer value N (must be positive).
      * @return The validated integer N.

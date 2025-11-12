@@ -31,6 +31,7 @@ public class City {
         this.isCapital = isCapital;
     }
 
+
     /**
      * Prints the report header for City Reports.
      */

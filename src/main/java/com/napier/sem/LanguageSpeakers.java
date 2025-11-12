@@ -48,6 +48,7 @@ public class LanguageSpeakers {
                 this.WorldPopulationPercent);
     }
 
+
     /**
      * Prints a formatted list of LanguageSpeakers objects.
      * @param speakers The list of LanguageSpeakers objects to print.

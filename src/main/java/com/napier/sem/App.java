@@ -10,7 +10,7 @@ import java.text.NumberFormat;
  * Represents the core application logic, database connection,
  * and methods for generating all 32 required reports (countries, cities, population).
  */
-@SuppressWarnings({"unused", "SqlResolve", "java:S1481"}) // Added S1481 to suppress unused variable warnings across the class
+@SuppressWarnings({"unused"})
 public class App {
     /** Connection to the MySQL database. */
     private Connection con = null;
@@ -326,9 +326,13 @@ public class App {
     // IV. Population Distribution Reports (UC23 - UC25)
     // =========================================================================
 
-    private List<PopulationSummary> executePopulationSummaryQuery(String groupColumn, String titlePrefix, String sql) {
+    /**
+     * Executes a population distribution query and prints the report.
+     * Note: Changed return type to void to resolve "Return value of the method is never used" warnings.
+     */
+    private void executePopulationSummaryQuery(String groupColumn, String titlePrefix, String sql) {
         List<PopulationSummary> summaries = new ArrayList<>();
-        if (con == null) return summaries;
+        if (con == null) return;
 
         try (Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -347,7 +351,6 @@ public class App {
             System.err.println("SQL Error executing population distribution report (" + titlePrefix + "): " + e.getMessage());
         }
         PopulationSummary.printReport(summaries, titlePrefix + " Population Breakdown");
-        return summaries;
     }
 
     // UC23: Continent Population Breakdown
@@ -501,10 +504,13 @@ public class App {
     /**
      * Runs a selection of reports for demonstration purposes.
      */
-    @SuppressWarnings("java:S1481") // Suppresses warnings about unused return values in this method (since we only call and display reports)
     public void runDemonstrationReports() {
         // --- Demonstration Inputs ---
         String continent = "Asia";
+        String region = "Eastern Asia";
+        String country = "United Kingdom";
+        String district = "Noord-Holland";
+        String city = "London";
         int N = 5;
 
         System.out.println("\n\n#####################################################");
@@ -526,9 +532,14 @@ public class App {
         getPopulationDistributionByContinent(); // UC23
 
         // E. Single Population Totals
+        // Lines 437, 442, 447, 452, 457, 462 in the file are where these calls exist
+        // and are now called without assignment, fixing the warnings.
         getWorldPopulation(); // UC26
-        getCountryPopulation("United Kingdom"); // UC29
-        getCityPopulation("London"); // UC31
+        getContinentPopulation(continent); // UC27
+        getRegionPopulation(region); // UC28
+        getCountryPopulation(country); // UC29
+        getDistrictPopulation(district); // UC30
+        getCityPopulation(city); // UC31
 
         // F. Language Report
         getMajorLanguageSpeakers(); // UC32

@@ -60,6 +60,7 @@ public class Country {
                 this.Capital);
     }
 
+
     /**
      * Prints a formatted list of Country objects.
      * @param countries The list of Country objects to print.
