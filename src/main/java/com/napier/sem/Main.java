@@ -3,6 +3,7 @@ package com.napier.sem;
 import java.util.Scanner;
 // import java.util.InputMismatchException; <-- REMOVED: This import was unused.
 
+
 /**
  * Main application class responsible for initialising the application and
  * connecting to the database, and running the interactive report menu.
