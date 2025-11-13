@@ -1,4 +1,4 @@
-name: Build & Test (Java 17 + MySQL)
+name: A workflow for my Hello World App
 
 on:
   push:
