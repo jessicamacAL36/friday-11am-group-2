@@ -1,4 +1,7 @@
-<project ...>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.napier.sem</groupId>
@@ -6,24 +9,18 @@
   <version>1.0-SNAPSHOT</version>
 
   <properties>
-    <!-- Compile for Java 17 -->
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-    <!-- Modern JUnit -->
     <junit.version>5.10.2</junit.version>
   </properties>
 
   <dependencies>
-    <!-- MySQL driver -->
-    <!-- (mysql-connector-java is OK; the newer artifactId is mysql-connector-j) -->
     <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
       <version>8.0.33</version>
     </dependency>
 
-    <!-- JUnit 5 BOM (optional) + Jupiter API & Engine -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -34,18 +31,15 @@
 
   <build>
     <plugins>
-      <!-- Modern Surefire – runs JUnit 5 without extra provider deps -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
         <configuration>
-          <!-- helpful if you hit module-path issues in some setups -->
           <useModulePath>false</useModulePath>
         </configuration>
       </plugin>
 
-      <!-- JaCoCo (as you had) -->
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
@@ -63,7 +57,6 @@
         </executions>
       </plugin>
 
-      <!-- Assembly plugin to produce *-jar-with-dependencies.jar -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -71,15 +64,14 @@
         <configuration>
           <archive>
             <manifest>
-              <!-- If your main class is App change to com.napier.sem.App -->
+              <!-- CHANGE THIS IF YOUR MAIN CLASS IS App -->
               <mainClass>com.napier.sem.Main</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
-          <!-- keep default naming: sem-group-project-1.0-SNAPSHOT-jar-with-dependencies.jar -->
-          <!-- DO NOT set finalName; DO NOT set appendAssemblyId to false -->
+          <!-- keep default naming: *-jar-with-dependencies.jar -->
         </configuration>
         <executions>
           <execution>
