@@ -1,7 +1,6 @@
 package com.napier.sem;
 
 import java.util.Scanner;
-// import java.util.InputMismatchException; <-- REMOVED: This import was unused.
 
 
 /**
@@ -16,8 +15,14 @@ public class Main {
         // Create an instance of the App class
         App app = new App();
 
-        // Connect to the database
-        app.connect();
+        // FIX: Connect using command line arguments or default local Docker settings
+        if(args.length < 2) {
+            // Default: Connect to local Docker port 33060 with 30s delay
+            app.connect("localhost:33060", 30000);
+        } else {
+            // GitHub Actions/Docker Compose: Use provided arguments
+            app.connect(args[0], Integer.parseInt(args[1]));
+        }
 
         // Run the main menu loop if connection is successful
         if (app.getCon() != null) {

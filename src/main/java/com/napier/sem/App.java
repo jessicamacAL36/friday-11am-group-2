@@ -22,35 +22,57 @@ public class App {
     }
 
     /**
-     * Connects to the MySQL database.
+     * Connects to the MySQL database at the specified location after a delay.
+     * @param location The hostname and port (e.g., "localhost:33060").
+     * @param delay The initial delay in milliseconds before the first connection attempt.
      */
-    public void connect() {
+    public void connect(String location, int delay) { // <-- UPDATED SIGNATURE
         try {
+            // Load Database driver
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
             System.err.println("Error: MySQL JDBC Driver not found. Check dependencies in pom.xml.");
             return;
         }
 
-        String url = "jdbc:mysql://localhost:3306/world?allowPublicKeyRetrieval=true&useSSL=false";
         String user = "root";
         String password = "example";
 
+        // --- 1. INITIAL LONG WAIT (HAPPENS ONLY ONCE) ---
+        try {
+            System.out.println("Initial connection delay: waiting " + delay + "ms...");
+            Thread.sleep(delay); // Apply the full, single long delay here.
+        } catch (InterruptedException ie) {
+            System.out.println("Connection interrupted during initial wait.");
+            Thread.currentThread().interrupt();
+            return;
+        }
+
+        // --- 2. RETRY LOOP (HAPPENS MULTIPLE TIMES WITH SHORT DELAY) ---
         int retries = 10;
         for (int i = 0; i < retries; ++i) {
             System.out.println("Attempting to connect to database... (Attempt " + (i + 1) + ")");
             try {
-                Thread.sleep(3000);
-                con = DriverManager.getConnection(url, user, password);
+                // Connect to database using location parameter and 'world' database name
+                con = DriverManager.getConnection("jdbc:mysql://" + location
+                                + "/world?allowPublicKeyRetrieval=true&useSSL=false",
+                        user, password);
                 System.out.println("Successfully connected to MySQL database!");
-                break;
+                return; // Exit method on success
             } catch (SQLException sqle) {
-                System.out.println("SQL Exception: DB not yet available. Retrying...");
-            } catch (InterruptedException ie) {
-                System.out.println("Connection interrupted.");
-                Thread.currentThread().interrupt();
+                System.out.println("SQL Exception: DB not yet available. Retrying in 3s...");
+                System.out.println(sqle.getMessage());
+                try {
+                    // Short, standard delay for retries (3 seconds)
+                    Thread.sleep(3000);
+                } catch (InterruptedException ie) {
+                    System.out.println("Retry sleep interrupted.");
+                    Thread.currentThread().interrupt();
+                    return;
+                }
             }
         }
+        System.err.println("Failed to connect to database after all retries.");
     }
 
     /**
@@ -294,14 +316,16 @@ public class App {
     public void getCapitalCitiesByRegion(String regionName) {
         String sql = "SELECT ci.Name, c.Name AS Country, ci.Population, ci.District FROM country AS c " +
                 "JOIN city AS ci ON c.Capital = ci.ID WHERE c.Region = ? ORDER BY ci.Population DESC";
+        // FIX: Must call executeCityReportQuery
         List<City> cities = executeCityReportQuery(sql, true, regionName);
         City.printReport(cities, "UC19: All Capital Cities in Region '" + regionName + "'", true);
     }
 
-    // UC20: Top N populated capital cities in the world
+    // UC20: Top N populated capital cities in the world (around line 322)
     public void getTopNGlobalCapitals(int N) {
         String sql = "SELECT ci.Name, c.Name AS Country, ci.Population, ci.District FROM country AS c " +
                 "JOIN city AS ci ON c.Capital = ci.ID ORDER BY ci.Population DESC LIMIT ?";
+        // FIX: The parameters must be SQL, boolean (true for capital), and N
         List<City> cities = executeCityReportQuery(sql, true, N);
         City.printReport(cities, "UC20: Top " + N + " Populated Capital Cities in the World", true);
     }
@@ -310,7 +334,10 @@ public class App {
     public void getTopNContinentCapitals(String continentName, int N) {
         String sql = "SELECT ci.Name, c.Name AS Country, ci.Population, ci.District FROM country AS c " +
                 "JOIN city AS ci ON c.Capital = ci.ID WHERE c.Continent = ? ORDER BY ci.Population DESC LIMIT ?";
-        List<City> cities = executeCityReportQuery(sql, true, continentName, N);
+
+        // FIX: Change executeReportQuery to executeCityReportQuery
+        List<City> cities = executeCityReportQuery(sql, true, continentName, N); // <-- THIS IS THE FIX
+
         City.printReport(cities, "UC21: Top " + N + " Populated Capital Cities in Continent '" + continentName + "'", true);
     }
 
@@ -318,6 +345,7 @@ public class App {
     public void getTopNRegionCapitals(String regionName, int N) {
         String sql = "SELECT ci.Name, c.Name AS Country, ci.Population, ci.District FROM country AS c " +
                 "JOIN city AS ci ON c.Capital = ci.ID WHERE c.Region = ? ORDER BY ci.Population DESC LIMIT ?";
+        // FIX: Must call executeCityReportQuery
         List<City> cities = executeCityReportQuery(sql, true, regionName, N);
         City.printReport(cities, "UC22: Top " + N + " Populated Capital Cities in Region '" + regionName + "'", true);
     }
