@@ -1,3 +1,4 @@
+# A. Country Reports
 ## Use Case: UC02 - Continent Country Report
 
 **Goal in Context (User Story):** As an Analyst, I want to retrieve a report of all countries in a specified continent sorted by population so that I can focus on regional demographics.

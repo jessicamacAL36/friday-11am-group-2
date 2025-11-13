@@ -1,3 +1,4 @@
+# A. Country Reports
 ## Use Case: UC01 - Generate Global Country Report
 
 **Goal in Context (User Story):** As an Analyst, I want to retrieve a report of all countries in the world sorted by population so that I can analyze global demographics.
