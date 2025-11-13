@@ -64,14 +64,13 @@
         <configuration>
           <archive>
             <manifest>
-              <!-- CHANGE THIS IF YOUR MAIN CLASS IS App -->
+              <!-- CHANGE THIS TO App if that's your entrypoint -->
               <mainClass>com.napier.sem.Main</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
-          <!-- keep default naming: *-jar-with-dependencies.jar -->
         </configuration>
         <executions>
           <execution>
