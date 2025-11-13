@@ -296,6 +296,7 @@ public class App {
     // III. Capital City Reports (UC17 - UC22)
     // =========================================================================
 
+
     // UC17: All capital cities in the world
     public void getGlobalCapitalCityReport() {
         String sql = "SELECT ci.Name, c.Name AS Country, ci.Population, ci.District FROM country AS c " +

@@ -12,12 +12,12 @@ public class AppIntegrationTest {
     // This App instance will connect to the live database
     static App app;
 
+
     @BeforeAll
     static void init() {
-        // IMPORTANT: This connects to the database via the exposed Docker port.
-        // Ensure your Docker database is running on localhost:33060.
+        // Increase the timeout to 60 seconds (60000ms) for robustness
         app = new App();
-        app.connect("localhost:3306", 30000);
+        app.connect("localhost:3306", 60000); // Changed 12000 to 60000
     }
 
     /**
