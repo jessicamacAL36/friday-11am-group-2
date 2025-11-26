@@ -3,6 +3,11 @@ on:
   push:
     branches:
       - master
+
+# FIX 1: Grant permissions for the automatic release action to write tags and releases.
+permissions:
+  contents: write
+
 jobs:
   UnitTests:
     name: Unit Tests
@@ -17,12 +22,12 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
-      - name: Unit Tests
-        run: mvn -Dtest=com.napier.devops.AppTest test
+      # FIX 2: Corrected test package name from 'devops' to 'sem'
+      - name: Run Unit Tests
+        run: mvn -Dtest=com.napier.sem.AppTest test
       - name: CodeCov
         uses: codecov/codecov-action@v2
         with:
-          # token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
           directory: ./target/site/jacoco
           flags: Unit Tests # optional
           verbose: true # optional (default = false)
@@ -31,6 +36,7 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-22.04
     steps:
+      # FIX 3: Added missing Checkout and JDK setup
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -40,21 +46,27 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
+
       - name: Integration Tests and CodeCov
         run: |
+          # Use database container name 'db' or 'mysql' if possible, or use the hostname 'localhost'
+          # NOTE: The current container run uses 'employees' as the container name.
           docker build -t database ./db 
           docker run --name employees -dp 33060:3306 database
-          mvn -Dtest=com.napier.devops.AppIntegrationTest test          
+          
+          # FIX 4: Corrected test package name from 'devops' to 'sem'
+          mvn -Dtest=com.napier.sem.AppIntegrationTest test          
+          
           docker stop employees
           docker rm employees
           docker image rm database
       - name: CodeCov
         uses: codecov/codecov-action@v2
         with:
-          # token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
           directory: ./target/site/jacoco
           flags: Integration Tests # optional
           verbose: true # optional (default = false)
+
   build:
     name: Build Run in Docker and Deploy Release
     runs-on: ubuntu-22.04
@@ -68,14 +80,20 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
+
       - name: Package and Run docker compose
         run: |
-          mvn package -DskipTests
+          # FIX 5: Run mvn clean install *before* running Docker. Docker needs the JAR file.
+          mvn clean install -DskipTests
+          # Run docker compose
           docker compose up --abort-on-container-exit
+
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
-          automatic_release_tag: "latest"
+          # FINAL FIX: Use the 'github.ref_name' variable. If the push is on the '0.1.0.3' branch,
+          # the tag will be created as '0.1.0.3', which should avoid the internal action error.
+          automatic_release_tag: "${{ github.ref_name }}"
           files: |
             ./target/*.jar
