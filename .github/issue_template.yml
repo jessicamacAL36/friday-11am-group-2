@@ -2,10 +2,7 @@ name: Bug Report
 description: File a bug report for an unexpected issue or behavior.
 title: "[Bug]: "
 labels: ["bug", "triage"]
-# Optional: Remove or update these lines if your repository doesn't use project boards or specific default assignees.
-# projects: ["octo-org/1"]
-# assignees:
-#   - octocat
+
 body:
   - type: markdown
     attributes:
