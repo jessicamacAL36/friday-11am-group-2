@@ -57,9 +57,9 @@ jobs:
           docker run --name employees -dp 33060:3306 database
           
           # 2. Wait for the database to be ready.
-          # IMPORTANT: Assuming 'wait-for-db.sh' is in the root directory.
-          chmod +x wait-for-db.sh
-          ./wait-for-db.sh localhost:33060
+          # IMPORTANT FIX: Assuming 'wait-for-db.sh' is in the './db/' subdirectory.
+          chmod +x ./db/wait-for-db.sh
+          ./db/wait-for-db.sh localhost:33060
           
           # 3. Run Integration Tests.
           # We pass the correct connection string (localhost:33060) as a Maven property.
