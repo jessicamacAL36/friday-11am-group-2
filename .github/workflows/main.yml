@@ -1,52 +1,81 @@
-name: Build & Test (Java 17 + MySQL)
-
+name: A workflow for my Hello World App
 on:
   push:
-    branches: [ main, master, develop ]
-  pull_request:
-    branches: [ main, master, develop ]
-
+    branches:
+      - master
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: example
-          MYSQL_DATABASE: world
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h localhost -pexample"
-          --health-interval=10s --health-timeout=5s --health-retries=10
-
+  UnitTests:
+    name: Unit Tests
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: '17'
+          submodules: recursive
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Unit Tests
+        run: mvn -Dtest=com.napier.devops.AppTest test
+      - name: CodeCov
+        uses: codecov/codecov-action@v2
+        with:
+          # token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          directory: ./target/site/jacoco
+          flags: Unit Tests # optional
+          verbose: true # optional (default = false)
 
-      - name: Load world.sql
+  IntegrationTests:
+    name: Integration Tests
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Integration Tests and CodeCov
         run: |
-          sudo apt-get update && sudo apt-get install -y mysql-client
-          for i in {1..30}; do
-            mysql -h 127.0.0.1 -uroot -pexample -e "SELECT 1" && break
-            sleep 2
-          done
-          mysql -h 127.0.0.1 -uroot -pexample world < db/world-db/world.sql
-
-      - name: Build & run tests
-        run: mvn -B -ntp clean test
-
-      - name: Archive surefire reports
-        if: always()
-        uses: actions/upload-artifact@v4
+          docker build -t database ./db 
+          docker run --name employees -dp 33060:3306 database
+          mvn -Dtest=com.napier.devops.AppIntegrationTest test          
+          docker stop employees
+          docker rm employees
+          docker image rm database
+      - name: CodeCov
+        uses: codecov/codecov-action@v2
         with:
-          name: surefire-reports
-          path: target/surefire-reports/**
+          # token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          directory: ./target/site/jacoco
+          flags: Integration Tests # optional
+          verbose: true # optional (default = false)
+  build:
+    name: Build Run in Docker and Deploy Release
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+      - name: Package and Run docker compose
+        run: |
+          mvn package -DskipTests
+          docker compose up --abort-on-container-exit
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          automatic_release_tag: "latest"
+          files: |
+            ./target/*.jar
