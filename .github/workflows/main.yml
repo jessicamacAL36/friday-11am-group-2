@@ -2,109 +2,49 @@ name: A workflow for my Hello World App
 
 on:
   push:
-    branches:
-      - master
-
-permissions:
-  contents: write
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
 
 jobs:
-  UnitTests:
-    name: Unit Tests
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
-        with:
-          java-version: '17'
-          distribution: 'adopt'
-
-      - name: Run Unit Tests
-        run: mvn -Dtest=com.napier.sem.AppTest test
-
-      - name: CodeCov Unit Tests Report
-        uses: codecov/codecov-action@v2
-        with:
-          directory: ./target/site/jacoco
-          flags: Unit Tests
-          verbose: true
-
-  IntegrationTests:
-    name: Integration Tests
-    runs-on: ubuntu-22.04
-    # The integration tests need to pass before we build and deploy.
-    needs: UnitTests
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
-        with:
-          java-version: '17'
-          distribution: 'adopt'
-
-      - name: Build, Run DB, Test, and Cleanup
-        run: |
-          # 1. Build and Run the Database Container.
-          # We expose port 33060 on the runner, mapping to 3306 internal to the container.
-          docker build -t database ./db 
-          docker run --name employees -dp 33060:3306 database
-          
-          # 2. Wait for the database to be ready.
-          # IMPORTANT FIX: Assuming 'wait-for-db.sh' is in the './db/' subdirectory.
-          chmod +x ./db/wait-for-db.sh
-          ./db/wait-for-db.sh localhost:33060
-          
-          # 3. Run Integration Tests.
-          # We pass the correct connection string (localhost:33060) as a Maven property.
-          mvn -Dtest=com.napier.sem.AppIntegrationTest test -Ddb_host="localhost:33060"          
-          
-          # 4. Clean up Docker resources
-          docker stop employees
-          docker rm employees
-          docker image rm database
-
-      - name: CodeCov Integration Tests Report
-        uses: codecov/codecov-action@v2
-        with:
-          directory: ./target/site/jacoco
-          flags: Integration Tests
-          verbose: true
-
   build:
-    name: Build Run in Docker and Deploy Release
-    # Only run build/deploy if both test jobs pass
-    needs: [UnitTests, IntegrationTests]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: example
+          MYSQL_DATABASE: world
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -pexample"
+          --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
       - name: Set up JDK 17
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
+          distribution: temurin
           java-version: '17'
-          distribution: 'adopt'
 
-      - name: Package and Run docker compose
+      - name: Load world.sql
         run: |
-          # Ensure the JAR is packaged before attempting to run Docker
-          mvn clean install -DskipTests
-          # Run docker compose (using the corrected 'docker compose' syntax)
-          docker compose up --abort-on-container-exit
+          sudo apt-get update && sudo apt-get install -y mysql-client
+          for i in {1..30}; do
+            mysql -h 127.0.0.1 -uroot -pexample -e "SELECT 1" && break
+            sleep 2
+          done
+          mysql -h 127.0.0.1 -uroot -pexample world < db/world-db/world.sql
+      - name: Build & run tests
+        run: mvn -B -ntp clean test
 
-      - name: Automatic Release
-        uses: "marvinpinto/action-automatic-releases@latest"
+      - name: Archive surefire reports
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
-          automatic_release_tag: "${{ github.ref_name }}"
-          files: |
-            ./target/*.jar
+          name: surefire-reports
+          path: target/surefire-reports/**
