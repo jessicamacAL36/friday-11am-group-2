@@ -1,99 +1,80 @@
-name: A workflow for my Hello World App
+name: Group Project CI
+
 on:
   push:
-    branches:
-      - master
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
-# FIX 1: Grant permissions for the automatic release action to write tags and releases.
 permissions:
   contents: write
 
 jobs:
-  UnitTests:
-    name: Unit Tests
-    runs-on: ubuntu-22.04
+  tests:
+    name: Build, Unit, and Integration Tests
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'adopt'
-      # FIX 2: Corrected test package name from 'devops' to 'sem'
+          distribution: 'temurin'
+          cache: 'maven'
+
       - name: Run Unit Tests
-        run: mvn -Dtest=com.napier.sem.AppTest test
-      - name: CodeCov
-        uses: codecov/codecov-action@v2
-        with:
-          directory: ./target/site/jacoco
-          flags: Unit Tests # optional
-          verbose: true # optional (default = false)
+        run: mvn test -Dtest=com.napier.sem.AppTest
 
-  IntegrationTests:
-    name: Integration Tests
-    runs-on: ubuntu-22.04
-    steps:
-      # FIX 3: Added missing Checkout and JDK setup
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
-        with:
-          java-version: '17'
-          distribution: 'adopt'
+      - name: Start Docker Services (Database and Application)
+        run: docker-compose up -d --wait
 
-      - name: Integration Tests and CodeCov
+      - name: Wait for DB Health Check (Critical Fix)
         run: |
-          # Use database container name 'db' or 'mysql' if possible, or use the hostname 'localhost'
-          # NOTE: The current container run uses 'employees' as the container name.
-          docker build -t database ./db 
-          docker run --name employees -dp 33060:3306 database
-          
-          # FIX 4: Corrected test package name from 'devops' to 'sem'
-          mvn -Dtest=com.napier.sem.AppIntegrationTest test          
-          
-          docker stop employees
-          docker rm employees
-          docker image rm database
-      - name: CodeCov
-        uses: codecov/codecov-action@v2
+          chmod +x wait-for-db.sh
+          ./wait-for-db.sh db
+
+      - name: Run Integration Tests
+        run: mvn test -Dtest=com.napier.sem.AppIntegrationTest
+        env:
+          DB_HOST: db
+
+      - name: Stop Docker Services
+        if: always()
+        run: docker-compose down
+
+      - name: CodeCov Report
+        uses: codecov/codecov-action@v4
         with:
           directory: ./target/site/jacoco
-          flags: Integration Tests # optional
-          verbose: true # optional (default = false)
+          flags: All Tests
+          verbose: true
 
-  build:
-    name: Build Run in Docker and Deploy Release
-    runs-on: ubuntu-22.04
+  deploy:
+    name: Build and Release
+    needs: tests
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'adopt'
+          distribution: 'temurin'
+          cache: 'maven'
 
-      - name: Package and Run docker compose
-        run: |
-          # FIX 5: Run mvn clean install *before* running Docker. Docker needs the JAR file.
-          mvn clean install -DskipTests
-          # Run docker compose
-          docker compose up --abort-on-container-exit
+      - name: Package JAR
+        run: mvn clean install -DskipTests
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
-          # FINAL FIX: Use the 'github.ref_name' variable. If the push is on the '0.1.0.3' branch,
-          # the tag will be created as '0.1.0.3', which should avoid the internal action error.
           automatic_release_tag: "${{ github.ref_name }}"
           files: |
             ./target/*.jar
