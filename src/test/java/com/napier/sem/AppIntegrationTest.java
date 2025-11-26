@@ -16,10 +16,15 @@ public class AppIntegrationTest {
 
     @BeforeAll
     static void init() {
+        // Get the DB host and port from the Maven property (set by the CI pipeline to include port 33060)
+        // If the property is not set (e.g., local IDE run), it defaults to "localhost:3306".
+        String connectionString = System.getProperty("db_host", "localhost:3306");
+
         // Change the connection timeout to 30 seconds (30000ms)
         app = new App();
-        // Uses port 3306 as confirmed by docker ps
-        app.connect("localhost:3306", 30000);
+
+        // Use the dynamically determined connection string
+        app.connect(connectionString, 30000);
     }
 
     /**

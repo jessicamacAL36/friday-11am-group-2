@@ -1,4 +1,5 @@
 name: A workflow for my Hello World App
+
 on:
   push:
     branches:
@@ -21,9 +22,11 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
+
       - name: Run Unit Tests
         run: mvn -Dtest=com.napier.sem.AppTest test
-      - name: CodeCov
+
+      - name: CodeCov Unit Tests Report
         uses: codecov/codecov-action@v2
         with:
           directory: ./target/site/jacoco
@@ -33,6 +36,8 @@ jobs:
   IntegrationTests:
     name: Integration Tests
     runs-on: ubuntu-22.04
+    # The integration tests need to pass before we build and deploy.
+    needs: UnitTests
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,29 +49,28 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
 
-      - name: Integration Tests and CodeCov
+      - name: Build, Run DB, Test, and Cleanup
         run: |
-          # 1. Build and Run the Database Container, exposing it to the host machine on 33060.
+          # 1. Build and Run the Database Container.
+          # We expose port 33060 on the runner, mapping to 3306 internal to the container.
           docker build -t database ./db 
-          # The database is accessible at localhost:33060 on the runner machine.
           docker run --name employees -dp 33060:3306 database
           
-          # Wait for the database to be ready (Critical addition for reliability)
-          # Assuming you have the wait-for-db.sh script available in the repository root.
+          # 2. Wait for the database to be ready.
+          # IMPORTANT: Assuming 'wait-for-db.sh' is in the root directory.
           chmod +x wait-for-db.sh
           ./wait-for-db.sh localhost:33060
           
-          # 2. Run Integration Tests
-          # The DB_HOST environment variable MUST match the port exposed by Docker, 33060.
-          # We pass this as a variable to the Maven command.
+          # 3. Run Integration Tests.
+          # We pass the correct connection string (localhost:33060) as a Maven property.
           mvn -Dtest=com.napier.sem.AppIntegrationTest test -Ddb_host="localhost:33060"          
           
-          # 3. Clean up
+          # 4. Clean up Docker resources
           docker stop employees
           docker rm employees
           docker image rm database
 
-      - name: CodeCov
+      - name: CodeCov Integration Tests Report
         uses: codecov/codecov-action@v2
         with:
           directory: ./target/site/jacoco
@@ -75,6 +79,8 @@ jobs:
 
   build:
     name: Build Run in Docker and Deploy Release
+    # Only run build/deploy if both test jobs pass
+    needs: [UnitTests, IntegrationTests]
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
@@ -89,11 +95,13 @@ jobs:
 
       - name: Package and Run docker compose
         run: |
-          # Run mvn clean install *before* running Docker. Docker needs the JAR file.
+          # Ensure the JAR is packaged before attempting to run Docker
           mvn clean install -DskipTests
-          # Run docker compose
+          # Run docker compose (using the corrected 'docker compose' syntax)
           docker compose up --abort-on-container-exit
-      - uses: "marvinpinto/action-automatic-releases@latest"
+
+      - name: Automatic Release
+        uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
