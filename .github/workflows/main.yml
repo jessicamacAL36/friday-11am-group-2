@@ -4,7 +4,6 @@ on:
     branches:
       - master
 
-# FIX 1: Grant permissions for the automatic release action to write tags and releases.
 permissions:
   contents: write
 
@@ -22,21 +21,19 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
-      # FIX 2: Corrected test package name from 'devops' to 'sem'
       - name: Run Unit Tests
         run: mvn -Dtest=com.napier.sem.AppTest test
       - name: CodeCov
         uses: codecov/codecov-action@v2
         with:
           directory: ./target/site/jacoco
-          flags: Unit Tests # optional
-          verbose: true # optional (default = false)
+          flags: Unit Tests
+          verbose: true
 
   IntegrationTests:
     name: Integration Tests
     runs-on: ubuntu-22.04
     steps:
-      # FIX 3: Added missing Checkout and JDK setup
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -49,23 +46,32 @@ jobs:
 
       - name: Integration Tests and CodeCov
         run: |
-          # Use database container name 'db' or 'mysql' if possible, or use the hostname 'localhost'
-          # NOTE: The current container run uses 'employees' as the container name.
+          # 1. Build and Run the Database Container, exposing it to the host machine on 33060.
           docker build -t database ./db 
+          # The database is accessible at localhost:33060 on the runner machine.
           docker run --name employees -dp 33060:3306 database
           
-          # FIX 4: Corrected test package name from 'devops' to 'sem'
-          mvn -Dtest=com.napier.sem.AppIntegrationTest test          
+          # Wait for the database to be ready (Critical addition for reliability)
+          # Assuming you have the wait-for-db.sh script available in the repository root.
+          chmod +x wait-for-db.sh
+          ./wait-for-db.sh localhost:33060
           
+          # 2. Run Integration Tests
+          # The DB_HOST environment variable MUST match the port exposed by Docker, 33060.
+          # We pass this as a variable to the Maven command.
+          mvn -Dtest=com.napier.sem.AppIntegrationTest test -Ddb_host="localhost:33060"          
+          
+          # 3. Clean up
           docker stop employees
           docker rm employees
           docker image rm database
+
       - name: CodeCov
         uses: codecov/codecov-action@v2
         with:
           directory: ./target/site/jacoco
-          flags: Integration Tests # optional
-          verbose: true # optional (default = false)
+          flags: Integration Tests
+          verbose: true
 
   build:
     name: Build Run in Docker and Deploy Release
@@ -83,7 +89,7 @@ jobs:
 
       - name: Package and Run docker compose
         run: |
-          # FIX 5: Run mvn clean install *before* running Docker. Docker needs the JAR file.
+          # Run mvn clean install *before* running Docker. Docker needs the JAR file.
           mvn clean install -DskipTests
           # Run docker compose
           docker compose up --abort-on-container-exit
@@ -91,8 +97,6 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
-          # FINAL FIX: Use the 'github.ref_name' variable. If the push is on the '0.1.0.3' branch,
-          # the tag will be created as '0.1.0.3', which should avoid the internal action error.
           automatic_release_tag: "${{ github.ref_name }}"
           files: |
             ./target/*.jar
