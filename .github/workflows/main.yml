@@ -1,4 +1,4 @@
-name: Group Project CI
+name: A workflow for my Hello World App
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Code v2
         uses: actions/checkout@v4
 
       - name: Set up Java 17
