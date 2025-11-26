@@ -68,6 +68,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+
       - name: Package JAR
         run: mvn clean install -DskipTests
 
