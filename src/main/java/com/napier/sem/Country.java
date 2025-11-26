@@ -23,6 +23,12 @@ public class Country {
     public String Capital;
 
     /**
+     * FIX: Added public no-argument constructor for unit testing purposes.
+     */
+    public Country() {
+    }
+
+    /**
      * Constructor for Country object.
      */
     public Country(String code, String name, String continent, String region, long population, String capital) {
@@ -59,10 +65,6 @@ public class Country {
                 nf.format(this.Population),
                 this.Capital);
     }
-
-
-
-
 
     /**
      * Prints a formatted list of Country objects.

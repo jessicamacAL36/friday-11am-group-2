@@ -105,13 +105,26 @@ public class App {
         if (con == null) return results;
 
         try (PreparedStatement pStmt = con.prepareStatement(sql)) {
-            for (int i = 0; i < params.length; i++) {
-                if (params[i] instanceof String) {
-                    pStmt.setString(i + 1, (String) params[i]);
-                } else if (params[i] instanceof Integer) {
-                    pStmt.setInt(i + 1, (int) params[i]);
+            // Handle LIMIT parameter (N) which is an integer
+            // N should always be the last parameter if present, otherwise string parameters first.
+            int strParamCount = 0;
+            int limitParam = -1;
+
+            for (Object param : params) {
+                if (param instanceof String) {
+                    strParamCount++;
+                    pStmt.setString(strParamCount, (String) param);
+                } else if (param instanceof Integer) {
+                    limitParam = (int) param;
                 }
             }
+
+            // Set integer/LIMIT parameter last
+            if (limitParam != -1) {
+                // Assuming LIMIT is the last placeholder (?)
+                pStmt.setInt(strParamCount + 1, limitParam);
+            }
+
             try (ResultSet rs = pStmt.executeQuery()) {
                 while (rs.next()) {
                     results.add(mapper.map(rs));
@@ -128,6 +141,7 @@ public class App {
     // =========================================================================
 
     private Country mapToCountry(ResultSet rs) throws SQLException {
+        // Uses the public field constructor: (Code, Name, Continent, Region, Population, Capital)
         return new Country(
                 rs.getString("Code"),
                 rs.getString("Name"),
@@ -194,14 +208,20 @@ public class App {
     // II. City Report Methods (UC07 - UC16)
     // =========================================================================
 
-    private List<City> executeCityReportQuery(String sql, boolean isCapital, Object... params) {
-        return executeReportQuery(sql, (rs) -> new City(
+    private City mapToCity(ResultSet rs, boolean isCapital) throws SQLException {
+        // Uses the City constructor: (Name, Country, District, Population, isCapital)
+        return new City(
                 rs.getString("Name"),
                 rs.getString("Country"),
                 rs.getString("District"),
                 rs.getLong("Population"),
                 isCapital
-        ), params);
+        );
+    }
+
+    private List<City> executeCityReportQuery(String sql, boolean isCapital, Object... params) {
+        // Use executeReportQuery with a lambda that calls the specific mapper
+        return executeReportQuery(sql, (rs) -> mapToCity(rs, isCapital), params);
     }
 
     // UC07: All cities in the world
@@ -296,7 +316,6 @@ public class App {
     // III. Capital City Reports (UC17 - UC22)
     // =========================================================================
 
-
     // UC17: All capital cities in the world
     public void getGlobalCapitalCityReport() {
         String sql = "SELECT ci.Name, c.Name AS Country, ci.Population, ci.District FROM country AS c " +
@@ -317,7 +336,6 @@ public class App {
     public void getCapitalCitiesByRegion(String regionName) {
         String sql = "SELECT ci.Name, c.Name AS Country, ci.Population, ci.District FROM country AS c " +
                 "JOIN city AS ci ON c.Capital = ci.ID WHERE c.Region = ? ORDER BY ci.Population DESC";
-        // FIX: Must call executeCityReportQuery
         List<City> cities = executeCityReportQuery(sql, true, regionName);
         City.printReport(cities, "UC19: All Capital Cities in Region '" + regionName + "'", true);
     }
@@ -326,7 +344,6 @@ public class App {
     public void getTopNGlobalCapitals(int N) {
         String sql = "SELECT ci.Name, c.Name AS Country, ci.Population, ci.District FROM country AS c " +
                 "JOIN city AS ci ON c.Capital = ci.ID ORDER BY ci.Population DESC LIMIT ?";
-        // FIX: The parameters must be SQL, boolean (true for capital), and N
         List<City> cities = executeCityReportQuery(sql, true, N);
         City.printReport(cities, "UC20: Top " + N + " Populated Capital Cities in the World", true);
     }
@@ -335,10 +352,7 @@ public class App {
     public void getTopNContinentCapitals(String continentName, int N) {
         String sql = "SELECT ci.Name, c.Name AS Country, ci.Population, ci.District FROM country AS c " +
                 "JOIN city AS ci ON c.Capital = ci.ID WHERE c.Continent = ? ORDER BY ci.Population DESC LIMIT ?";
-
-        // FIX: Change executeReportQuery to executeCityReportQuery
-        List<City> cities = executeCityReportQuery(sql, true, continentName, N); // <-- THIS IS THE FIX
-
+        List<City> cities = executeCityReportQuery(sql, true, continentName, N);
         City.printReport(cities, "UC21: Top " + N + " Populated Capital Cities in Continent '" + continentName + "'", true);
     }
 
@@ -346,7 +360,6 @@ public class App {
     public void getTopNRegionCapitals(String regionName, int N) {
         String sql = "SELECT ci.Name, c.Name AS Country, ci.Population, ci.District FROM country AS c " +
                 "JOIN city AS ci ON c.Capital = ci.ID WHERE c.Region = ? ORDER BY ci.Population DESC LIMIT ?";
-        // FIX: Must call executeCityReportQuery
         List<City> cities = executeCityReportQuery(sql, true, regionName, N);
         City.printReport(cities, "UC22: Top " + N + " Populated Capital Cities in Region '" + regionName + "'", true);
     }
@@ -355,9 +368,20 @@ public class App {
     // IV. Population Distribution Reports (UC23 - UC25)
     // =========================================================================
 
+    private PopulationSummary mapToPopulationSummary(ResultSet rs) throws SQLException {
+        // Uses the 6-argument constructor: (name, totalPop, cityPop, cityPopPct, ruralPop, ruralPopPct)
+        return new PopulationSummary(
+                rs.getString("Name"),
+                rs.getLong("TotalPopulation"),
+                rs.getLong("CityPopulation"),
+                rs.getDouble("CityPopulationPercent"),
+                rs.getLong("RuralPopulation"),
+                rs.getDouble("RuralPopulationPercent")
+        );
+    }
+
     /**
      * Executes a population distribution query and prints the report.
-     * Note: Changed return type to void to resolve "Return value of the method is never used" warnings.
      */
     private void executePopulationSummaryQuery(String groupColumn, String titlePrefix, String sql) {
         List<PopulationSummary> summaries = new ArrayList<>();
@@ -367,14 +391,7 @@ public class App {
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                summaries.add(new PopulationSummary(
-                        rs.getString("Name"),
-                        rs.getLong("TotalPopulation"),
-                        rs.getLong("CityPopulation"),
-                        rs.getDouble("CityPopulationPercent"),
-                        rs.getLong("RuralPopulation"),
-                        rs.getDouble("RuralPopulationPercent")
-                ));
+                summaries.add(mapToPopulationSummary(rs));
             }
         } catch (SQLException e) {
             System.err.println("SQL Error executing population distribution report (" + titlePrefix + "): " + e.getMessage());
@@ -496,6 +513,15 @@ public class App {
     // VI. Language Report (UC32)
     // =========================================================================
 
+    private LanguageSpeakers mapToLanguageSpeakers(ResultSet rs) throws SQLException {
+        // Uses the 3-argument constructor: (language, speakers (double), percentWorldPopulation)
+        return new LanguageSpeakers(
+                rs.getString("Language"),
+                rs.getDouble("Speakers"),
+                rs.getDouble("WorldPopulationPercent")
+        );
+    }
+
     // UC32: Global Language Speakers Report
     public void getMajorLanguageSpeakers() {
         if (con == null) return;
@@ -508,20 +534,7 @@ public class App {
                 "GROUP BY cl.Language " +
                 "ORDER BY Speakers DESC";
 
-        List<LanguageSpeakers> speakers = new ArrayList<>();
-        try (Statement stmt = con.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) {
-                speakers.add(new LanguageSpeakers(
-                        rs.getString("Language"),
-                        rs.getDouble("Speakers"),
-                        rs.getDouble("WorldPopulationPercent")
-                ));
-            }
-        } catch (SQLException e) {
-            System.err.println("SQL Error executing language report (UC32): " + e.getMessage());
-        }
+        List<LanguageSpeakers> speakers = executeReportQuery(sql, this::mapToLanguageSpeakers);
         LanguageSpeakers.printReport(speakers, "UC32: Global Language Speakers Report (Chinese, English, Hindi, Spanish, Arabic)");
     }
 

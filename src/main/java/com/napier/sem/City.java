@@ -1,7 +1,7 @@
 package com.napier.sem;
 
-import java.text.NumberFormat;
 import java.util.List;
+import java.text.NumberFormat;
 import java.util.Locale;
 
 /**
@@ -12,25 +12,30 @@ public class City {
     /** City Name */
     public String Name;
     /** Country Name */
-    public String Country;
-    /** District Name (null for Capital City reports) */
+    public String CountryName;
+    /** District Name */
     public String District;
     /** City Population */
     public long Population;
     /** Flag to indicate if the report is a Capital City report (affects output format) */
-    private final boolean isCapital; // <-- FIXED: Declared as final
+    public boolean isCapital;
 
     /**
-     * Constructor for City object.
+     * FIX: Added public no-argument constructor for unit testing purposes.
      */
-    public City(String name, String country, String district, long population, boolean isCapital) {
+    public City() {
+    }
+
+    /**
+     * Constructor for City object (used by App.java mapper).
+     */
+    public City(String name, String countryName, String district, long population, boolean isCapital) {
         this.Name = name;
-        this.Country = country;
+        this.CountryName = countryName;
         this.District = district;
         this.Population = population;
         this.isCapital = isCapital;
     }
-
 
     /**
      * Prints the report header for City Reports.
@@ -62,13 +67,13 @@ public class City {
             // Capital City Format (Name, Country, Population)
             System.out.printf("| %-30s | %-30s | %-15s |\n",
                     this.Name,
-                    this.Country,
+                    this.CountryName,
                     nf.format(this.Population));
         } else {
             // Standard City Format (Name, Country, District, Population)
             System.out.printf("| %-30s | %-30s | %-20s | %-15s |\n",
                     this.Name,
-                    this.Country,
+                    this.CountryName,
                     this.District != null ? this.District : "N/A",
                     nf.format(this.Population));
         }
@@ -86,9 +91,6 @@ public class City {
             System.out.println("---------------------------------------------------");
             return;
         }
-
-
-
 
         System.out.println("\n=====================================================================================================");
         System.out.println(" " + title);

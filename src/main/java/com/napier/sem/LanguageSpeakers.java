@@ -16,6 +16,12 @@ public class LanguageSpeakers {
     public double WorldPopulationPercent;
 
     /**
+     * FIX: Added public no-argument constructor for unit testing purposes.
+     */
+    public LanguageSpeakers() {
+    }
+
+    /**
      * Constructor for LanguageSpeakers object.
      */
     public LanguageSpeakers(String language, double speakers, double worldPopulationPercent) {
@@ -47,10 +53,6 @@ public class LanguageSpeakers {
                 formattedSpeakers,
                 this.WorldPopulationPercent);
     }
-
-
-
-
 
     /**
      * Prints a formatted list of LanguageSpeakers objects.

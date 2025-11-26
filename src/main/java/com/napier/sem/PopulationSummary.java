@@ -23,6 +23,12 @@ public class PopulationSummary {
     public double RuralPopulationPercent;
 
     /**
+     * FIX: Added public no-argument constructor for unit testing purposes.
+     */
+    public PopulationSummary() {
+    }
+
+    /**
      * Constructor for PopulationSummary object.
      */
     public PopulationSummary(String name, long totalPop, long cityPop, double cityPopPct, long ruralPop, double ruralPopPct) {
@@ -59,9 +65,6 @@ public class PopulationSummary {
                 this.RuralPopulationPercent);
     }
 
-
-
-
     /**
      * Prints a formatted list of PopulationSummary objects.
      * @param summaries The list of PopulationSummary objects to print.
@@ -74,7 +77,6 @@ public class PopulationSummary {
             System.out.println("---------------------------------------------------");
             return;
         }
-
 
         System.out.println("\n====================================================================================================================================================");
         System.out.println(" " + title);

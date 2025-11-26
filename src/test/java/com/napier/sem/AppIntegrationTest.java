@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Integration Tests for the App class, verifying database interaction
  * using a running local database instance (Docker).
+ * Updated to use 30-second connection delay.
  */
 public class AppIntegrationTest {
     // This App instance will connect to the live database
@@ -15,9 +16,10 @@ public class AppIntegrationTest {
 
     @BeforeAll
     static void init() {
-        // Increase the timeout to 60 seconds (60000ms) for robustness
+        // Change the connection timeout to 30 seconds (30000ms)
         app = new App();
-        app.connect("localhost:3306", 60000); // Changed 12000 to 60000
+        // Uses port 3306 as confirmed by docker ps
+        app.connect("localhost:3306", 30000);
     }
 
     /**
@@ -51,15 +53,13 @@ public class AppIntegrationTest {
     @Test
     void testGetCountriesByContinentValid() {
         try {
-            // Correct: Just call the method. The assertion is that it doesn't crash.
+            // Note: This calls app logic which should instantiate and use the Country class
             app.getCountriesByContinent("Europe");
 
             // Assert that the method completed successfully without crashing.
             assertTrue(true, "UC02 should run and print successfully for valid continent.");
 
         } catch (Exception e) {
-            // FIX: The fail() method must be called directly, not assigned to a variable.
-            // If an exception is caught, the test fails.
             fail("UC02 threw an exception during execution: " + e.getMessage());
         }
     }

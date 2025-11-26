@@ -18,7 +18,7 @@ public class Main {
         // FIX: Connect using command line arguments or default local Docker settings
         if(args.length < 2) {
             // Default: Connect to local Docker port 33060 with 30s delay
-            app.connect("localhost:33060", 30000);
+            app.connect("localhost:3306", 30000);
         } else {
             // GitHub Actions/Docker Compose: Use provided arguments
             app.connect(args[0], Integer.parseInt(args[1]));
